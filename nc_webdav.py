@@ -112,10 +112,31 @@ class Nextcloud:
         return True
 
 
+def load_env_file(filename=".env"):
+    """Read KEY=value lines from a .env file sitting next to this script."""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
+    values = {}
+
+    if not os.path.exists(path):
+        return values
+
+    with open(path, encoding="utf-8") as handle:
+        for line in handle:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, value = line.partition("=")
+            values[key.strip()] = value.strip().strip('"').strip("'")
+
+    return values
+
+
 def load_client():
-    url = os.environ.get("NC_URL")
-    user = os.environ.get("NC_USER")
-    password = os.environ.get("NC_APP_PASSWORD")
+    env = load_env_file()
+
+    url = os.environ.get("NC_URL") or env.get("NC_URL")
+    user = os.environ.get("NC_USER") or env.get("NC_USER")
+    password = os.environ.get("NC_APP_PASSWORD") or env.get("NC_APP_PASSWORD")
 
     missing = [n for n, v in (("NC_URL", url), ("NC_USER", user), ("NC_APP_PASSWORD", password)) if not v]
     if missing:
