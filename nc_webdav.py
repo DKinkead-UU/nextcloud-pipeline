@@ -1,13 +1,4 @@
- """
-Nextcloud WebDAV basics for the document pipeline.
 
-Set these before running:
-    export NC_URL="https://your-instance.example"
-    export NC_USER="daniel"
-    export NC_APP_PASSWORD="xxxxx-xxxxx-xxxxx-xxxxx-xxxxx"
-
-Run it with no arguments to list /Processing/Incoming.
-"""
 
 import os
 import sys
