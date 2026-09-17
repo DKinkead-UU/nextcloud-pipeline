@@ -1,4 +1,4 @@
-"""
+ """
 Nextcloud WebDAV basics for the document pipeline.
 
 Set these before running:
