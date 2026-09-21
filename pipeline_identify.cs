@@ -79,7 +79,7 @@ static DocType ClassifyDocument(string text, List<DocType> docTypes)
             bestScore = score;
         }
     }
-    Score runnerUp = null;
+    Score? runnerUp = null;
 
     foreach (Score score in scores)
     {
@@ -103,6 +103,34 @@ static DocType ClassifyDocument(string text, List<DocType> docTypes)
         return DocType.NeedsReview;
     }
     return bestScore.DocType;
+}
+
+static string FindOriginalFile(string sidecarPath)
+{
+    string folder = Path.GetDirectoryName(sidecarPath);
+    string stem = Path.GetFileNameWithoutExtension(sidecarPath);
+
+    string exactMatch = Path.Combine(folder, stem);
+
+    if (File.Exists(exactMatch))
+    {
+        return exactMatch;
+    }
+
+    foreach (string candidate in Directory.GetFiles(folder))
+    {
+        if (candidate == sidecarPath)
+        {
+            continue;
+        }
+
+        if (Path.GetFileNameWithoutExtension(candidate) == stem)
+        {
+            return candidate;
+        }
+    }
+
+    return null;
 }
 
 static int CountOccurrences(string text, string pattern)
