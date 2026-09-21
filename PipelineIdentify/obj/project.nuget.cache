@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "7eS1V3yslfM=",
+  "success": true,
+  "projectFilePath": "/workspaces/nextcloud-pipeline/PipelineIdentify/PipelineIdentify.csproj",
+  "expectedPackageFiles": [
+    "/home/codespace/.nuget/packages/pdfpig/0.1.16/pdfpig.0.1.16.nupkg.sha512"
+  ],
+  "logs": []
+}

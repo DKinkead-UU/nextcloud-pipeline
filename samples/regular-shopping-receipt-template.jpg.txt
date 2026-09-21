@@ -1,0 +1,10 @@
+1x Lorem ipsum $ 35.00
+2x Lorem ipsum $ 15.00
+1x Lorem ipsum $ 30.00
+1x Lorem ipsum $ 10.00
+2x Lorem ipsum $ 10.00
+1x Lorem ipsum $ 7.00
+1x Lorem ipsum $ 10.00
+TOTAL AMOUNT $117.00
+CASH $ 200.00
+CHANGE $ 83.00

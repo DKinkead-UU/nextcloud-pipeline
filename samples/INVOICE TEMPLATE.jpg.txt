@@ -1,0 +1,28 @@
+INVOICE
+
+ISSUED TO: INVOICE NO: 01234
+Richard Sanchez DATE: 11.02.2030
+Thynk Unlimited DUE DATE: 11.03.2030
+
+123 Anywhere St., Any City
+
+PAY TO:
+
+Borcele Bank
+
+Account Name: Adeline Palmerston
+Account No.: 0123 4567 8901
+
+DESCRIPTION UNIT PRICE QTY TOTAL
+Brand consultation 100 1 $100
+logo design 100 1 $100
+Website design 100 1 $100
+Social media templates 100 1 $100
+Brand photography 100 1 $100
+Brand guide 100 4 $100
+SUBTOTAL $400
+
+Tax 10%
+
+TOTAL $440
+
