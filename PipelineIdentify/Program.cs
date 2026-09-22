@@ -15,10 +15,11 @@ List<Marker> invoiceMarkers =
 
 List<Marker> receiptMarkers =
 [
-    new("receipt", 2),
-    new("total amount", 2),
-    new("cash", 1),
-    new("thank you", 1)
+    new("change due", 3),
+    new("total amount", 1),
+    new("payment method", 2),
+    new("cashier", 1),
+    new("cash", 2)
 ];
 
 List<Marker> contractMarkers =
