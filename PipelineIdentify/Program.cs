@@ -42,17 +42,18 @@ List<DocType> docTypes =
     new("contract", contractMarkers)
 ];
 
-foreach (string sidecarPath in Directory.GetFiles("samples", "*.txt"))
+foreach (string pdfPath in Directory.GetFiles("samples", "*.pdf"))
 {
-    string? originalPath = FindOriginalFile(sidecarPath);
+    string? originalPath = FindOriginalFile(pdfPath);
+    string text = File.ReadAllText(pdfPath);
 
     if (originalPath == null)
     {
-        Console.WriteLine($"No original found for {Path.GetFileName(sidecarPath)}");
+        Console.WriteLine($"No original found for {Path.GetFileName(pdfPath)}");
         continue;
     }
 
-    string text = File.ReadAllText(sidecarPath);
+    string text = File.ReadAllText(pdfPath);
     List<Score> scores = KeywordScan(text, docTypes);
     DocType result = ClassifyDocument(scores);
 
@@ -92,10 +93,10 @@ static DocType ClassifyDocument(List<Score> scores)
     return tooLow || tooClose ? DocType.NeedsReview : best.DocType;
 }
 
-static string? FindOriginalFile(string sidecarPath)
+static string FindOriginalFile(string pdfPath)
 {
-    string folder = Path.GetDirectoryName(sidecarPath) ?? ".";
-    string stem = Path.GetFileNameWithoutExtension(sidecarPath);
+    string folder = Path.GetDirectoryName(pdfPath) ?? ".";
+    string stem = Path.GetFileNameWithoutExtension(pdfPath);
     string exactMatch = Path.Combine(folder, stem);
 
     if (File.Exists(exactMatch))
@@ -104,7 +105,7 @@ static string? FindOriginalFile(string sidecarPath)
     }
 
     return Directory.GetFiles(folder)
-        .FirstOrDefault(candidate => candidate != sidecarPath && Path.GetFileNameWithoutExtension(candidate) == stem);
+            .FirstOrDefault(candidate => candidate != pdfPath && Path.GetFileNameWithoutExtension(candidate) == stem) && Path.GetExtension(candidate) != ".txt" ?? pdfPath;
 }
 
 static int CountOccurrences(string text, string pattern)
