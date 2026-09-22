@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using UglyToad.PdfPig;
 
 List<Marker> invoiceMarkers =
 [
@@ -17,7 +18,6 @@ List<Marker> receiptMarkers =
     new("receipt", 2),
     new("total amount", 2),
     new("cash", 1),
-    new("change", 1),
     new("thank you", 1)
 ];
 
@@ -44,16 +44,9 @@ List<DocType> docTypes =
 
 foreach (string pdfPath in Directory.GetFiles("samples", "*.pdf"))
 {
-    string? originalPath = FindOriginalFile(pdfPath);
-    string text = File.ReadAllText(pdfPath);
+    string originalPath = FindOriginalFile(pdfPath);
+    string text = ReadPdfText(pdfPath);
 
-    if (originalPath == null)
-    {
-        Console.WriteLine($"No original found for {Path.GetFileName(pdfPath)}");
-        continue;
-    }
-
-    string text = File.ReadAllText(pdfPath);
     List<Score> scores = KeywordScan(text, docTypes);
     DocType result = ClassifyDocument(scores);
 
@@ -105,7 +98,7 @@ static string FindOriginalFile(string pdfPath)
     }
 
     return Directory.GetFiles(folder)
-            .FirstOrDefault(candidate => candidate != pdfPath && Path.GetFileNameWithoutExtension(candidate) == stem) && Path.GetExtension(candidate) != ".txt" ?? pdfPath;
+            .FirstOrDefault(candidate => candidate != pdfPath && Path.GetFileNameWithoutExtension(candidate) == stem && Path.GetExtension(candidate) != ".txt" && Path.GetFileNameWithoutExtension(candidate) == stem) ?? pdfPath;
 }
 
 static int CountOccurrences(string text, string pattern)
@@ -125,6 +118,15 @@ static int CountOccurrences(string text, string pattern)
     }
 
     return count;
+}
+
+static string ReadPdfText(string pdfPath)
+{
+    using PdfDocument document = PdfDocument.Open(pdfPath);
+
+    return string.Join(" ", document.GetPages()
+        .SelectMany(page => page.GetWords())
+        .Select(word => word.Text));
 }
 
 public record Marker(string Pattern, int Weight);
