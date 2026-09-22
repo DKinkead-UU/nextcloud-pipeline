@@ -1,8 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using UglyToad.PdfPig;
+
+const string incoming = "Processing/Incoming";
 
 List<Marker> invoiceMarkers =
 [
@@ -43,20 +41,63 @@ List<DocType> docTypes =
     new("contract", contractMarkers)
 ];
 
-foreach (string pdfPath in Directory.GetFiles("samples", "*.pdf"))
-{
-    string originalPath = FindOriginalFile(pdfPath);
-    string text = ReadPdfText(pdfPath);
+NextcloudClient nextcloud = NextcloudClient.FromEnvironment();
+List<RemoteFile> files = await nextcloud.ListFolder(incoming);
+HashSet<string> names = files.Select(file => file.Name).ToHashSet();
 
+foreach (RemoteFile pdf in files.Where(file => file.Name.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase)))
+{
+    string sidecar = Path.GetFileNameWithoutExtension(pdf.Name) + ".txt";
+
+    if (!names.Contains(sidecar))
+    {
+        Console.WriteLine($"{pdf.Name} -> not ready");
+        continue;
+    }
+
+    RemoteFile original = FindOriginal(pdf, files);
+    string text = ReadPdfText(await nextcloud.Download($"{incoming}/{pdf.Name}"));
     List<Score> scores = KeywordScan(text, docTypes);
     DocType result = ClassifyDocument(scores);
 
-    Console.WriteLine($"{Path.GetFileName(originalPath)} -> {result.Name}");
+    string destination = result == DocType.NeedsReview
+        ? "Processing/Needs review"
+        : $"Processing/Documents/{result.Name}";
 
-    foreach (Score score in scores)
+    await nextcloud.MakeFolder(destination);
+
+    foreach (string name in new[] { original.Name, pdf.Name, sidecar }.Distinct())
     {
-        Console.WriteLine($"    {score.DocType.Name}: {score.Value}");
+        await nextcloud.Move($"{incoming}/{name}", $"{destination}/{name}");
     }
+
+    if (result != DocType.NeedsReview)
+    {
+        await nextcloud.TagFile(original.FileId, await nextcloud.GetOrCreateTag(result.Name));
+    }
+
+    string summary = string.Join(", ", scores.Select(score => $"{score.DocType.Name}={score.Value}"));
+    Console.WriteLine($"{original.Name} -> {result.Name} ({summary})");
+}
+
+static RemoteFile FindOriginal(RemoteFile pdf, List<RemoteFile> files)
+{
+    string stem = Path.GetFileNameWithoutExtension(pdf.Name);
+
+    return files.FirstOrDefault(file => file.Name == stem)
+        ?? files.FirstOrDefault(file => file != pdf
+            && Path.GetExtension(file.Name) != ".txt"
+            && Path.GetFileNameWithoutExtension(file.Name) == stem)
+        ?? pdf;
+}
+
+static string ReadPdfText(byte[] pdf)
+{
+    using PdfDocument document = PdfDocument.Open(pdf);
+
+    return string.Join(" ", document.GetPages()
+        .SelectMany(page => page.GetWords())
+        .Select(word => word.Text));
 }
 
 static List<Score> KeywordScan(string text, List<DocType> docTypes)
@@ -87,21 +128,6 @@ static DocType ClassifyDocument(List<Score> scores)
     return tooLow || tooClose ? DocType.NeedsReview : best.DocType;
 }
 
-static string FindOriginalFile(string pdfPath)
-{
-    string folder = Path.GetDirectoryName(pdfPath) ?? ".";
-    string stem = Path.GetFileNameWithoutExtension(pdfPath);
-    string exactMatch = Path.Combine(folder, stem);
-
-    if (File.Exists(exactMatch))
-    {
-        return exactMatch;
-    }
-
-    return Directory.GetFiles(folder)
-            .FirstOrDefault(candidate => candidate != pdfPath && Path.GetFileNameWithoutExtension(candidate) == stem && Path.GetExtension(candidate) != ".txt" && Path.GetFileNameWithoutExtension(candidate) == stem) ?? pdfPath;
-}
-
 static int CountOccurrences(string text, string pattern)
 {
     if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(pattern))
@@ -119,15 +145,6 @@ static int CountOccurrences(string text, string pattern)
     }
 
     return count;
-}
-
-static string ReadPdfText(string pdfPath)
-{
-    using PdfDocument document = PdfDocument.Open(pdfPath);
-
-    return string.Join(" ", document.GetPages()
-        .SelectMany(page => page.GetWords())
-        .Select(word => word.Text));
 }
 
 public record Marker(string Pattern, int Weight);
