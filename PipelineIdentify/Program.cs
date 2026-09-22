@@ -14,10 +14,8 @@ List<Marker> invoiceMarkers =
 List<Marker> receiptMarkers =
 [
     new("change due", 3),
-    new("total amount", 1),
-    new("payment method", 2),
-    new("cashier", 1),
-    new("cash", 2)
+    new("cash", 2),
+    new("total amount", 1)
 ];
 
 List<Marker> contractMarkers =
@@ -41,7 +39,7 @@ List<DocType> docTypes =
     new("contract", contractMarkers)
 ];
 
-NextcloudClient nextcloud = NextcloudClient.FromEnvironment();
+NextcloudClient nextcloud = await NextcloudClient.Connect();
 List<RemoteFile> files = await nextcloud.ListFolder(incoming);
 HashSet<string> names = files.Select(file => file.Name).ToHashSet();
 

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PipelineIdentify")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f976c3a4aa3f077f7c80c110b20d2b72725bbbc3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b9e2e64f008ccbb337bffec89d2b065eaef103e9")]
 [assembly: System.Reflection.AssemblyProductAttribute("PipelineIdentify")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PipelineIdentify")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

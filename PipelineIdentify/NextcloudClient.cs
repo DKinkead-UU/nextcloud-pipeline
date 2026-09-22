@@ -13,18 +13,17 @@ public class NextcloudClient
 
     readonly HttpClient http = new();
     readonly string baseUrl;
-    readonly string filesRoot;
+    string filesRoot = "";
 
-    public NextcloudClient(string url, string user, string password)
+    NextcloudClient(string url, string login, string password)
     {
         baseUrl = url.TrimEnd('/');
-        filesRoot = $"{baseUrl}/remote.php/dav/files/{Uri.EscapeDataString(user)}";
 
-        string token = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{user}:{password}"));
+        string token = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{login}:{password}"));
         http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", token);
     }
 
-    public static NextcloudClient FromEnvironment()
+    public static async Task<NextcloudClient> Connect()
     {
         string url = Require("NC_URL");
 
@@ -33,7 +32,23 @@ public class NextcloudClient
             throw new InvalidOperationException("NC_URL must start with https://");
         }
 
-        return new NextcloudClient(url, Require("NC_USER"), Require("NC_APP_PASSWORD"));
+        NextcloudClient client = new(url, Require("NC_USER"), Require("NC_APP_PASSWORD"));
+        string userId = await client.GetUserId();
+        client.filesRoot = $"{client.baseUrl}/remote.php/dav/files/{Uri.EscapeDataString(userId)}";
+
+        return client;
+    }
+
+    async Task<string> GetUserId()
+    {
+        HttpRequestMessage request = new(HttpMethod.Get, $"{baseUrl}/ocs/v2.php/cloud/user?format=json");
+        request.Headers.Add("OCS-APIRequest", "true");
+
+        HttpResponseMessage response = await http.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        using JsonDocument json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        return json.RootElement.GetProperty("ocs").GetProperty("data").GetProperty("id").GetString()!;
     }
 
     public async Task<List<RemoteFile>> ListFolder(string path)
