@@ -39,7 +39,23 @@ List<DocType> docTypes =
     new("contract", contractMarkers)
 ];
 
+Dictionary<string, string> colours = new()
+{
+    ["invoice"] = "0082c9",
+    ["receipt"] = "31cc7c",
+    ["contract"] = "f1db50",
+    ["Needs review"] = "ff7a66"
+};
+
 NextcloudClient nextcloud = await NextcloudClient.Connect();
+
+int boardId = await nextcloud.GetOrCreateBoard("Documents");
+
+foreach (string stack in new[] { "invoice", "receipt", "contract", "Needs review", "Completed" })
+{
+    await nextcloud.GetOrCreateStack(boardId, stack);
+}
+
 List<RemoteFile> files = await nextcloud.ListFolder(incoming);
 HashSet<string> names = files.Select(file => file.Name).ToHashSet();
 
@@ -64,17 +80,9 @@ foreach (RemoteFile pdf in files.Where(file => file.Name.EndsWith(".pdf", String
 
     await nextcloud.MakeFolder(destination);
 
-    try
+    foreach (string name in new[] { original.Name, pdf.Name, sidecar }.Distinct())
     {
-        foreach (string name in new[] { original.Name, pdf.Name, sidecar }.Distinct())
-        {
-            await nextcloud.Move($"{incoming}/{name}", $"{destination}/{name}");
-        }
-    }
-    catch (HttpRequestException error) when (error.StatusCode == System.Net.HttpStatusCode.Locked)
-    {
-        Console.WriteLine($"{original.Name} -> skipped, file locked, retry next run");
-        continue;
+        await nextcloud.Move($"{incoming}/{name}", $"{destination}/{name}");
     }
 
     if (result != DocType.NeedsReview)
@@ -83,6 +91,11 @@ foreach (RemoteFile pdf in files.Where(file => file.Name.EndsWith(".pdf", String
     }
 
     string summary = string.Join(", ", scores.Select(score => $"{score.DocType.Name}={score.Value}"));
+    string stackTitle = result == DocType.NeedsReview ? "Needs review" : result.Name;
+    string description = $"[{original.Name}]({nextcloud.FileLink(original.FileId)})\n\n{summary}";
+
+    await nextcloud.AddCard(boardId, stackTitle, original.Name, description, colours[stackTitle]);
+
     Console.WriteLine($"{original.Name} -> {result.Name} ({summary})");
 }
 

@@ -136,6 +136,87 @@ public class NextcloudClient
         return XDocument.Parse(await response.Content.ReadAsStringAsync());
     }
 
+    public string FileLink(string fileId) => $"{baseUrl}/index.php/f/{fileId}";
+
+    public async Task<int> GetOrCreateBoard(string title)
+    {
+        JsonElement boards = await Deck(HttpMethod.Get, "boards");
+
+        foreach (JsonElement board in boards.EnumerateArray())
+        {
+            if (board.GetProperty("title").GetString() == title)
+            {
+                return board.GetProperty("id").GetInt32();
+            }
+        }
+
+        JsonElement created = await Deck(HttpMethod.Post, "boards", new { title, color = "0082c9" });
+        return created.GetProperty("id").GetInt32();
+    }
+
+    public async Task<int> GetOrCreateStack(int boardId, string title)
+    {
+        JsonElement stacks = await Deck(HttpMethod.Get, $"boards/{boardId}/stacks");
+
+        foreach (JsonElement stack in stacks.EnumerateArray())
+        {
+            if (stack.GetProperty("title").GetString() == title)
+            {
+                return stack.GetProperty("id").GetInt32();
+            }
+        }
+
+        JsonElement created = await Deck(HttpMethod.Post, $"boards/{boardId}/stacks", new { title, order = 0 });
+        return created.GetProperty("id").GetInt32();
+    }
+
+    public async Task<int> GetOrCreateLabel(int boardId, string title, string colour)
+    {
+        JsonElement board = await Deck(HttpMethod.Get, $"boards/{boardId}");
+
+        foreach (JsonElement label in board.GetProperty("labels").EnumerateArray())
+        {
+            if (label.GetProperty("title").GetString() == title)
+            {
+                return label.GetProperty("id").GetInt32();
+            }
+        }
+
+        JsonElement created = await Deck(HttpMethod.Post, $"boards/{boardId}/labels", new { title, color = colour });
+        return created.GetProperty("id").GetInt32();
+    }
+
+    public async Task AddCard(int boardId, string stackTitle, string title, string description, string colour)
+    {
+        int stackId = await GetOrCreateStack(boardId, stackTitle);
+        int labelId = await GetOrCreateLabel(boardId, stackTitle, colour);
+
+        JsonElement card = await Deck(HttpMethod.Post, $"boards/{boardId}/stacks/{stackId}/cards",
+            new { title, type = "plain", order = 0, description });
+
+        int cardId = card.GetProperty("id").GetInt32();
+
+        await Deck(HttpMethod.Put, $"boards/{boardId}/stacks/{stackId}/cards/{cardId}/assignLabel",
+            new { labelId });
+    }
+
+    async Task<JsonElement> Deck(HttpMethod method, string path, object? body = null)
+    {
+        HttpRequestMessage request = new(method, $"{baseUrl}/index.php/apps/deck/api/v1.0/{path}");
+        request.Headers.Add("OCS-APIRequest", "true");
+
+        if (body != null)
+        {
+            request.Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
+        }
+
+        HttpResponseMessage response = await http.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        using JsonDocument json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        return json.RootElement.Clone();
+    }
+
     string FileUrl(string path) => $"{filesRoot}/{string.Join("/", path.Split('/').Select(Uri.EscapeDataString))}";
 
     static string Require(string name) =>
