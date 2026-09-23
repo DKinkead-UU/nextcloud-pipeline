@@ -64,9 +64,17 @@ foreach (RemoteFile pdf in files.Where(file => file.Name.EndsWith(".pdf", String
 
     await nextcloud.MakeFolder(destination);
 
-    foreach (string name in new[] { original.Name, pdf.Name, sidecar }.Distinct())
+    try
     {
-        await nextcloud.Move($"{incoming}/{name}", $"{destination}/{name}");
+        foreach (string name in new[] { original.Name, pdf.Name, sidecar }.Distinct())
+        {
+            await nextcloud.Move($"{incoming}/{name}", $"{destination}/{name}");
+        }
+    }
+    catch (HttpRequestException error) when (error.StatusCode == System.Net.HttpStatusCode.Locked)
+    {
+        Console.WriteLine($"{original.Name} -> skipped, file locked, retry next run");
+        continue;
     }
 
     if (result != DocType.NeedsReview)
