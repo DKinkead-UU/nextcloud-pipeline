@@ -22,3 +22,15 @@
 /workspaces/nextcloud-pipeline/PipelineIdentify/obj/Debug/net10.0/PipelineIdentify.pdb
 /workspaces/nextcloud-pipeline/PipelineIdentify/obj/Debug/net10.0/PipelineIdentify.genruntimeconfig.cache
 /workspaces/nextcloud-pipeline/PipelineIdentify/obj/Debug/net10.0/ref/PipelineIdentify.dll
+/workspaces/nextcloud-pipeline/PipelineIdentify/obj/Debug/net10.0/rpswa.dswa.cache.json
+/workspaces/nextcloud-pipeline/PipelineIdentify/obj/Debug/net10.0/PipelineIdentify.MvcApplicationPartsAssemblyInfo.cache
+/workspaces/nextcloud-pipeline/PipelineIdentify/bin/Debug/net10.0/PipelineIdentify.staticwebassets.endpoints.json
+/workspaces/nextcloud-pipeline/PipelineIdentify/obj/Debug/net10.0/rjimswa.dswa.cache.json
+/workspaces/nextcloud-pipeline/PipelineIdentify/obj/Debug/net10.0/rjsmrazor.dswa.cache.json
+/workspaces/nextcloud-pipeline/PipelineIdentify/obj/Debug/net10.0/rjsmcshtml.dswa.cache.json
+/workspaces/nextcloud-pipeline/PipelineIdentify/obj/Debug/net10.0/scopedcss/bundle/PipelineIdentify.styles.css
+/workspaces/nextcloud-pipeline/PipelineIdentify/obj/Debug/net10.0/staticwebassets.build.json
+/workspaces/nextcloud-pipeline/PipelineIdentify/obj/Debug/net10.0/staticwebassets.build.json.cache
+/workspaces/nextcloud-pipeline/PipelineIdentify/obj/Debug/net10.0/staticwebassets.development.json
+/workspaces/nextcloud-pipeline/PipelineIdentify/obj/Debug/net10.0/staticwebassets.build.endpoints.json
+/workspaces/nextcloud-pipeline/PipelineIdentify/obj/Debug/net10.0/swae.build.ex.cache

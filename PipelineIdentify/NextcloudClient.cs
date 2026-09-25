@@ -186,13 +186,20 @@ public class NextcloudClient
         return created.GetProperty("id").GetInt32();
     }
 
-    public async Task AddCard(int boardId, string stackTitle, string title, string description, string colour)
+    public async Task AddCard(int boardId, string stackTitle, string title, string description, string colour, DateTime? dueDate = null)
     {
         int stackId = await GetOrCreateStack(boardId, stackTitle);
         int labelId = await GetOrCreateLabel(boardId, stackTitle, colour);
 
         JsonElement card = await Deck(HttpMethod.Post, $"boards/{boardId}/stacks/{stackId}/cards",
-            new { title, type = "plain", order = 0, description });
+            new
+            {
+                title,
+                type = "plain",
+                order = 0,
+                description,
+                duedate = dueDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")
+            });
 
         int cardId = card.GetProperty("id").GetInt32();
 
