@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<info>
+    <id>pipeline</id>
+    <name>Document Pipeline</name>
+    <summary>Classifies, files and tags documents</summary>
+    <description>Classifies OCR'd documents, files them by type, tags them and creates Deck cards.</description>
+    <version>1.0.0</version>
+    <licence>agpl</licence>
+    <author>Daniel Kinkead</author>
+    <category>tools</category>
+    <nextcloud min-version="30" max-version="34"/>
+    <external-app>
+        <docker-install>
+            <registry>ghcr.io</registry>
+            <image>dkinkead-uu/pipeline</image>
+            <image-tag>latest</image-tag>
+        </docker-install>
+        <scopes>
+            <value>FILES</value>
+            <value>SYSTEMTAGS</value>
+        </scopes>
+    </external-app>
+</info>
